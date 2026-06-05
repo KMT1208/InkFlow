@@ -25,7 +25,7 @@ SaaS de prise de rendez-vous pour **tatoueurs** : le client réserve en ligne, d
 
 ## Supabase & multi-tenant (RLS au niveau base)
 - **3 clients** : `lib/supabase/client.ts` (navigateur), `lib/supabase/server.ts` (Server Components/Actions/Route Handlers), `lib/supabase/admin.ts` (**service-role — à créer**, `import "server-only"`, jamais exposé au client).
-- **Nouvelles clés Supabase** (pas les legacy) : `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`) + `SUPABASE_SECRET_KEY` (`sb_secret_…`). ⚠️ Le code actuel utilise encore `NEXT_PUBLIC_SUPABASE_ANON_KEY` → migration Phase 0.
+- **Nouvelles clés Supabase** (pas les legacy) : `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`) + `SUPABASE_SECRET_KEY` (`sb_secret_…`). Migration depuis les clés legacy : faite (Phase 0).
 - **Tenant = table `artists`** (`user_id` → `auth.users`). Les tables liées portent `artist_id` → `artists(id)`.
 - **RLS** : `artists` → `using (user_id = auth.uid())`. Tables liées → `using (artist_id = current_artist_id())` (fonction SQL STABLE renvoyant l'id d'artiste du user courant). **Deny by default** ; aucune table tenant lisible par `anon`.
 - **Lecture publique** (mini-site) : vue **`artist_public`** (colonnes sûres uniquement) + policy `anon` sur `flash` (où `is_available`) + fonction `get_free_slots()`. Jamais d'exposition des colonnes sensibles (Stripe, email, abonnement).
