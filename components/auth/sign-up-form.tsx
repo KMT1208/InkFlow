@@ -31,7 +31,7 @@ export function SignUpForm() {
       <div>
         <Label htmlFor="slug">Votre lien public</Label>
         <div className="flex items-center rounded-lg border border-line bg-surface focus-within:border-ink">
-          <span className="pl-3 text-sm text-bone-dim">inked.app/</span>
+          <span className="pl-3 text-sm text-bone-dim">inkflow.app/</span>
           <input
             id="slug"
             name="slug"

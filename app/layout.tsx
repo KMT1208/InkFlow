@@ -17,7 +17,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "INKED — Réservation pour tatoueurs",
+  title: "InkFlow — Réservation pour tatoueurs",
   description:
     "La page de réservation pensée pour les tatoueurs : portfolio, projet du client, créneau et acompte. Fini les no-shows.",
 };

@@ -5,7 +5,7 @@
 SaaS de prise de rendez-vous pour **tatoueurs** : le client réserve en ligne, décrit son projet, upload ses références, paie un acompte, reçoit des rappels SMS/email. Objectif central : **supprimer la gestion des DM Instagram**. (Nom de code historique du scaffold : « INKED ».)
 
 ## Décisions verrouillées
-- **Marque** : InkFlow (le scaffold dit encore « INKED » → rename à confirmer).
+- **Marque** : InkFlow (renommé depuis le nom de code « INKED » du scaffold).
 - **Langue** : FR par défaut, architecture **i18n-ready** (textes isolés, pas de chaînes en dur dispersées).
 - **Devise** : EUR. **Montants stockés en CENTIMES (entiers)**, `currency` en minuscules (`"eur"`). Jamais de float pour de l'argent.
 - **Conformité** : France d'abord (RGPD, SMS FR expéditeur alphanumérique + STOP, Stripe FR).

@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-// Le « slug » est l'identifiant dans l'URL publique : inked.app/<slug>.
+// Le « slug » est l'identifiant dans l'URL publique : inkflow.app/<slug>.
 export const slugSchema = z
   .string()
   .trim()

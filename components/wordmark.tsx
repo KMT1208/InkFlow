@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-// Logotype texte « INKED » (serif). Réutilisé dans l'auth et le tableau de bord.
+// Logotype texte « InkFlow » (serif). Réutilisé dans l'auth et le tableau de bord.
 export function Wordmark({
   href = "/",
   className,
@@ -17,7 +17,7 @@ export function Wordmark({
         className,
       )}
     >
-      INKED
+      InkFlow
     </Link>
   );
 }

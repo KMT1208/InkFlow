@@ -9,7 +9,7 @@ export default function Home() {
       <p className="mb-6 text-xs uppercase tracking-[0.4em] text-ink">
         Studio · Réservation
       </p>
-      <h1 className="font-serif text-6xl font-semibold sm:text-7xl">INKED</h1>
+      <h1 className="font-serif text-6xl font-semibold sm:text-7xl">InkFlow</h1>
       <p className="mt-6 max-w-md text-balance text-bone-dim">
         La page de réservation pensée pour les tatoueurs. Portfolio, projet du
         client, créneau et acompte — réunis dans un seul lien.
