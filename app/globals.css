@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/*
+  ───────────────────────────────────────────────────────────────
+  INKED — Design system (direction artistique « éditorial sombre »)
+  Palette : noir profond · rouge encre · blanc cassé.
+
+  En Tailwind v4, le thème se définit ICI, en CSS (il n'y a plus de
+  fichier tailwind.config.js). Chaque variable --color-* génère des
+  classes utilitaires : --color-ink → bg-ink / text-ink / border-ink…
+  ───────────────────────────────────────────────────────────────
+*/
+@theme {
+  /* Couleurs */
+  --color-noir: #0b0b0c; /* fond principal */
+  --color-surface: #151517; /* cartes & panneaux */
+  --color-surface-2: #1d1d20; /* survol & champs de saisie */
+  --color-bone: #f4f1ea; /* texte principal (blanc cassé) */
+  --color-bone-dim: #a8a39a; /* texte secondaire */
+  --color-ink: #e5302a; /* rouge encre (accent) */
+  --color-ink-dark: #b71f1a; /* rouge encre foncé (survol) */
+  --color-line: #2a2a2e; /* bordures discrètes */
+}
+
+/*
+  Les polices sont injectées par next/font (voir app/layout.tsx) sous forme
+  de variables CSS. Le mot-clé « inline » dit à Tailwind de référencer ces
+  variables telles quelles (elles n'existent qu'à l'exécution).
+*/
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-bodoni);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-noir);
+    color: var(--color-bone);
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+
+  /* Titres en serif expressive (esprit Bodoni). */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif), Georgia, serif;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: var(--color-ink);
+    color: #fff;
+  }
+}
