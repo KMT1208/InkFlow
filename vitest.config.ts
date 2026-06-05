@@ -8,6 +8,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["**/*.{test,spec}.ts"],
+    setupFiles: ["./vitest.setup.ts"],
   },
   resolve: {
     // Aligne l'alias "@/" sur le tsconfig (paths: { "@/*": ["./*"] }).
