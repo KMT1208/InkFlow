@@ -87,11 +87,23 @@ create policy artists_update_own on artists for update to authenticated using (u
 create or replace function handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.artists (user_id, slug, display_name)
+  -- display_name / avatar : on récupère aussi les métadonnées des comptes OAuth
+  -- (Google fournit full_name/name/avatar_url/picture, pas display_name/slug).
+  insert into public.artists (user_id, slug, display_name, avatar_url)
   values (
     new.id,
     coalesce(nullif(new.raw_user_meta_data ->> 'slug', ''), 'studio-' || left(new.id::text, 8)),
-    coalesce(nullif(new.raw_user_meta_data ->> 'display_name', ''), 'Studio')
+    coalesce(
+      nullif(new.raw_user_meta_data ->> 'display_name', ''),
+      nullif(new.raw_user_meta_data ->> 'full_name', ''),
+      nullif(new.raw_user_meta_data ->> 'name', ''),
+      nullif(split_part(coalesce(new.email, ''), '@', 1), ''),
+      'Studio'
+    ),
+    coalesce(
+      nullif(new.raw_user_meta_data ->> 'avatar_url', ''),
+      nullif(new.raw_user_meta_data ->> 'picture', '')
+    )
   );
   return new;
 end;

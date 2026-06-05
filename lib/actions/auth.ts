@@ -104,6 +104,51 @@ export async function signIn(
   redirect("/dashboard");
 }
 
+// Connexion / inscription par lien magique (sans mot de passe).
+export async function signInWithMagicLink(
+  _state: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  if (!isSupabaseConfigured()) return NON_CONFIGURE;
+
+  const parsed = emailSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) {
+    return { fieldErrors: parsed.error.flatten().fieldErrors };
+  }
+
+  const supabase = await createClient();
+  await supabase.auth.signInWithOtp({
+    email: parsed.data.email,
+    options: {
+      emailRedirectTo: `${getSiteUrl()}/auth/confirm?next=/dashboard`,
+      shouldCreateUser: true,
+    },
+  });
+
+  // Anti-énumération : message identique que le compte existe ou non.
+  return {
+    message:
+      "Si l'adresse est valide, un lien de connexion vient d'être envoyé. Vérifiez votre boîte mail.",
+  };
+}
+
+// Connexion / inscription via Google (OAuth, flux PKCE).
+export async function signInWithGoogle(): Promise<void> {
+  if (!isSupabaseConfigured()) redirect("/connexion?erreur=indisponible");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${getSiteUrl()}/auth/confirm?next=/dashboard` },
+  });
+
+  if (error || !data?.url) {
+    redirect("/connexion?erreur=lien-invalide");
+  }
+  // Redirige vers l'écran de consentement Google ; le retour passe par /auth/confirm.
+  redirect(data.url);
+}
+
 // Déconnexion (utilisée par un <form> dans le tableau de bord).
 export async function signOut() {
   if (isSupabaseConfigured()) {

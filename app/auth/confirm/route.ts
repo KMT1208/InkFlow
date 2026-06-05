@@ -10,6 +10,19 @@ export async function GET(request: NextRequest) {
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const next = searchParams.get("next") ?? "/dashboard";
+  const code = searchParams.get("code");
+
+  // Flux OAuth (Google) : échange du code PKCE contre une session.
+  if (code) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      return NextResponse.redirect(new URL(next, request.url));
+    }
+    return NextResponse.redirect(
+      new URL("/connexion?erreur=lien-invalide", request.url),
+    );
+  }
 
   if (token_hash && type) {
     const supabase = await createClient();

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getArtist } from "@/lib/auth";
 import { SignUpForm } from "@/components/auth/sign-up-form";
+import { AltAuth } from "@/components/auth/alt-auth";
 
 export default async function InscriptionPage() {
   if (await getArtist()) redirect("/dashboard");
@@ -14,6 +15,8 @@ export default async function InscriptionPage() {
       </p>
 
       <SignUpForm />
+
+      <AltAuth />
 
       <p className="mt-6 text-center text-sm text-bone-dim">
         Déjà inscrit ?{" "}
