@@ -80,20 +80,31 @@ export type DemoBookingStatus =
 export type DemoBooking = {
   id: string;
   client_name: string;
+  client_email: string;
+  client_phone: string;
   project: string;
+  projectType: "flash" | "custom";
+  description: string;
   body_zone: string;
+  size: string;
   budget: string;
+  references: number; // nb d'images jointes (placeholders en démo)
+  preferredDate: string;
   status: DemoBookingStatus;
   created: string;
 };
 
 export const DEMO_BOOKINGS: DemoBooking[] = [
-  { id: "b1", client_name: "Aïssa M.", project: "Custom — serpent & pivoine", body_zone: "avant-bras", budget: "300–400 €", status: "acompte_paye", created: "il y a 2 h" },
-  { id: "b2", client_name: "Tom R.", project: "Flash — dague fine line", body_zone: "bras", budget: "90 €", status: "nouvelle", created: "il y a 5 h" },
-  { id: "b3", client_name: "Léa B.", project: "Custom — pièce florale", body_zone: "dos", budget: "600 € et +", status: "devis_envoye", created: "hier" },
-  { id: "b4", client_name: "Karim D.", project: "Flash — phalène", body_zone: "sternum", budget: "140 €", status: "nouvelle", created: "hier" },
-  { id: "b5", client_name: "Manon V.", project: "Custom — lettrage", body_zone: "clavicule", budget: "200 €", status: "confirmee", created: "il y a 2 j" },
+  { id: "b1", client_name: "Aïssa M.", client_email: "aissa.m@example.com", client_phone: "06 12 34 56 78", project: "Custom — serpent & pivoine", projectType: "custom", description: "Un serpent enroulé autour d'une pivoine, style blackwork avec ombrage doux. Plutôt vertical, sur l'avant-bras intérieur.", body_zone: "avant-bras", size: "15 cm", budget: "300–400 €", references: 3, preferredDate: "Samedis de juin", status: "acompte_paye", created: "il y a 2 h" },
+  { id: "b2", client_name: "Tom R.", client_email: "tom.r@example.com", client_phone: "06 98 76 54 32", project: "Flash — dague fine line", projectType: "flash", description: "Intéressé par le flash « dague fine line », tel quel.", body_zone: "bras", size: "8 cm", budget: "90 €", references: 1, preferredDate: "Flexible", status: "nouvelle", created: "il y a 5 h" },
+  { id: "b3", client_name: "Léa B.", client_email: "lea.b@example.com", client_phone: "07 11 22 33 44", project: "Custom — pièce florale", projectType: "custom", description: "Grande composition florale dans le dos, fines lignes, beaucoup de détails.", body_zone: "dos", size: "30 cm", budget: "600 € et +", references: 5, preferredDate: "Courant juillet", status: "devis_envoye", created: "hier" },
+  { id: "b4", client_name: "Karim D.", client_email: "karim.d@example.com", client_phone: "06 55 66 77 88", project: "Flash — phalène", projectType: "flash", description: "Le flash phalène, centré sur le sternum.", body_zone: "sternum", size: "12 cm", budget: "140 €", references: 0, preferredDate: "Week-ends", status: "nouvelle", created: "hier" },
+  { id: "b5", client_name: "Manon V.", client_email: "manon.v@example.com", client_phone: "07 99 88 77 66", project: "Custom — lettrage", projectType: "custom", description: "Lettrage fin sur la clavicule : une date en chiffres romains.", body_zone: "clavicule", size: "6 cm", budget: "200 €", references: 2, preferredDate: "24 juin si possible", status: "confirmee", created: "il y a 2 j" },
 ];
+
+export function getDemoBooking(id: string): DemoBooking | null {
+  return DEMO_BOOKINGS.find((b) => b.id === id) ?? null;
+}
 
 export type DemoAppointment = {
   id: string;
