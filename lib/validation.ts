@@ -30,3 +30,35 @@ export const emailSchema = z.object({
 export const passwordSchema = z.object({
   password: z.string().min(8, { error: "Au moins 8 caractères." }),
 });
+
+// Slugs réservés : interdits à l'inscription (collision avec les routes plateforme).
+export const RESERVED_SLUGS = new Set([
+  "connexion",
+  "inscription",
+  "mot-de-passe-oublie",
+  "nouveau-mot-de-passe",
+  "dashboard",
+  "auth",
+  "api",
+  "pricing",
+  "tarifs",
+  "fonctionnalites",
+  "faq",
+  "admin",
+  "app",
+  "www",
+  "blog",
+  "support",
+  "aide",
+  "legal",
+  "cgu",
+  "cgv",
+  "confidentialite",
+  "contact",
+  "a-propos",
+  "inkflow",
+]);
+
+export function isReservedSlug(slug: string): boolean {
+  return RESERVED_SLUGS.has(slug.toLowerCase());
+}
