@@ -3,6 +3,8 @@ import type Stripe from "stripe";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { sendBookingConfirmation } from "@/lib/email";
+import { formatEur } from "@/lib/money";
 
 // Webhook Stripe. Route Handler (le seul usage autorisé des route handlers ici).
 // 1) Vérifie la SIGNATURE (constructEvent) — sinon 400.
@@ -68,7 +70,30 @@ export async function POST(request: NextRequest) {
           status: "succeeded",
         });
 
-        // TODO Phase 3 : email (Resend) + SMS (Twilio) de confirmation au client.
+        // Email de confirmation au client (best-effort, ne bloque pas le webhook).
+        const { data: bk } = await admin
+          .from("booking_requests")
+          .select("client_email, client_name")
+          .eq("id", bookingId)
+          .single();
+        let studioName = "votre studio";
+        if (artistId) {
+          const { data: art } = await admin
+            .from("artists")
+            .select("display_name")
+            .eq("id", artistId)
+            .single();
+          if (art?.display_name) studioName = art.display_name as string;
+        }
+        if (bk?.client_email) {
+          await sendBookingConfirmation({
+            to: bk.client_email as string,
+            studioName,
+            clientName: (bk.client_name as string | null) ?? null,
+            depositLabel: formatEur(session.amount_total ?? 0),
+          });
+        }
+        // TODO Phase 4 : SMS de confirmation (Twilio).
       }
     }
   } catch (err) {
