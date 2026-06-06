@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
-import { BookingCardMock } from "@/components/marketing/booking-card-mock";
+import { HeroVisual } from "@/components/marketing/hero-visual";
 
 export function Hero() {
   return (
@@ -46,8 +46,8 @@ export function Hero() {
           </p>
         </div>
 
-        <div className="animate-floaty lg:justify-self-end">
-          <BookingCardMock />
+        <div className="lg:justify-self-end">
+          <HeroVisual />
         </div>
       </div>
     </section>
