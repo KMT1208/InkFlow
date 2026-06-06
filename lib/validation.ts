@@ -62,3 +62,19 @@ export const RESERVED_SLUGS = new Set([
 export function isReservedSlug(slug: string): boolean {
   return RESERVED_SLUGS.has(slug.toLowerCase());
 }
+
+// Demande de réservation (intake client) déposée depuis la page publique.
+export const bookingRequestSchema = z.object({
+  slug: slugSchema,
+  projectType: z.enum(["flash", "custom"], { error: "Choisis un type de projet." }),
+  flashId: z.string().max(64).optional(),
+  description: z.string().max(2000).optional(),
+  bodyZone: z.string().max(120).optional(),
+  size: z.string().max(120).optional(),
+  budget: z.string().max(120).optional(),
+  preferredDate: z.string().max(160).optional(),
+  clientName: z.string().trim().min(2, { error: "Ton nom est requis." }),
+  clientEmail: z.email({ error: "Adresse email invalide." }).trim(),
+  clientPhone: z.string().trim().max(40).optional(),
+  consent: z.literal(true, { error: "Le consentement est obligatoire." }),
+});

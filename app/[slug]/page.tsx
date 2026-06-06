@@ -5,6 +5,7 @@ import { buttonClass } from "@/components/ui/button";
 import { isReservedSlug } from "@/lib/validation";
 import { getPublicArtist } from "@/lib/public-data";
 import { FlashGrid } from "@/components/public/flash-grid";
+import { BookingForm } from "@/components/public/booking-form";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -143,13 +144,8 @@ export default async function ArtistPage({ params }: Props) {
             ))}
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <span className={buttonClass("primary", "h-12 cursor-default px-7 opacity-90")}>
-              Commencer ma demande
-            </span>
-            <span className="text-sm text-bone-dim">
-              Formulaire d&apos;intake + paiement Stripe — Phase 3.
-            </span>
+          <div className="mt-10">
+            <BookingForm slug={slug} flash={flash} />
           </div>
         </div>
       </section>
