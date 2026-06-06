@@ -5,6 +5,7 @@ import { Check, CreditCard, ImagePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
+import { computeDepositCents, formatEur } from "@/lib/money";
 
 const THEMES = [
   { id: "editorial", name: "Éditorial sombre", bg: "#0b0b0c", accent: "#e5302a" },
@@ -90,10 +91,13 @@ export function SettingsForm() {
   const [saved, setSaved] = useState(false);
 
   const val = Number(depositValue) || 0;
+  const SAMPLE_TOTAL = 30_000; // 300 € en centimes
   const depositHint =
     depositType === "percent"
-      ? `Exemple : sur un projet à 300 €, l'acompte sera de ${Math.round((300 * val) / 100)} €.`
-      : `Acompte fixe de ${val} € par réservation.`;
+      ? `Exemple : sur un projet à ${formatEur(SAMPLE_TOTAL)}, l'acompte sera de ${formatEur(
+          computeDepositCents(SAMPLE_TOTAL, "percent", val),
+        )}.`
+      : `Acompte fixe de ${formatEur(val * 100)} par réservation.`;
 
   return (
     <div className="space-y-6">

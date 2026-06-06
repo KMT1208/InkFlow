@@ -8,6 +8,7 @@ import { Pricing } from "@/components/marketing/pricing";
 import { Faq } from "@/components/marketing/faq";
 import { FinalCta } from "@/components/marketing/cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { Reveal } from "@/components/marketing/reveal";
 
 export const metadata: Metadata = {
   title: "InkFlow — La réservation pensée pour les tatoueurs",
@@ -25,15 +26,33 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
+      <a
+        href="#contenu"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:text-white"
+      >
+        Aller au contenu
+      </a>
       <SiteNav />
-      <main className="flex-1">
+      <main id="contenu" className="flex-1">
         <Hero />
-        <Problem />
-        <Features />
-        <HowItWorks />
-        <Pricing />
-        <Faq />
-        <FinalCta />
+        <Reveal>
+          <Problem />
+        </Reveal>
+        <Reveal>
+          <Features />
+        </Reveal>
+        <Reveal>
+          <HowItWorks />
+        </Reveal>
+        <Reveal>
+          <Pricing />
+        </Reveal>
+        <Reveal>
+          <Faq />
+        </Reveal>
+        <Reveal>
+          <FinalCta />
+        </Reveal>
       </main>
       <SiteFooter />
     </>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Inter } from "next/font/google";
 import "./globals.css";
+import { getSiteUrl } from "@/lib/site";
 
 // Police serif expressive pour les titres (esprit Bodoni).
 const bodoni = Bodoni_Moda({
@@ -17,6 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: "InkFlow — Réservation pour tatoueurs",
   description:
     "La page de réservation pensée pour les tatoueurs : portfolio, projet du client, créneau et acompte. Fini les no-shows.",
