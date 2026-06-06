@@ -75,3 +75,36 @@ export async function sendBookingConfirmation(params: {
     console.error("Resend (confirmation) exception:", err);
   }
 }
+
+// Lien de paiement d'acompte envoyé au client (quand le tatoueur le demande).
+export async function sendDepositRequest(params: {
+  to: string;
+  studioName: string;
+  url: string;
+  amountLabel: string;
+}): Promise<void> {
+  if (!isResendConfigured()) return;
+
+  const studio = esc(params.studioName);
+  const amount = esc(params.amountLabel);
+  const href = esc(params.url);
+
+  const body = `
+    <h1 style="margin:0 0 12px;font-size:22px;color:#0b0b0c;">Réservez votre séance</h1>
+    <p style="margin:0 0 12px;color:#444;line-height:1.6;font-size:15px;">Pour confirmer votre rendez-vous chez <strong>${studio}</strong>, il reste à régler l'acompte de <strong>${amount}</strong>.</p>
+    <p style="margin:0 0 20px;color:#444;line-height:1.6;font-size:15px;">Paiement sécurisé par Stripe.</p>
+    <a href="${href}" style="display:inline-block;background:#e5302a;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 22px;border-radius:999px;">Payer l'acompte (${amount})</a>
+    <p style="margin:18px 0 0;color:#9a958c;font-size:12px;">Sans acompte, le créneau n'est pas confirmé.</p>`;
+
+  try {
+    const { error } = await client().emails.send({
+      from: FROM,
+      to: params.to,
+      subject: `Votre acompte pour réserver chez ${params.studioName}`,
+      html: layout(body),
+    });
+    if (error) console.error("Resend (acompte) error:", error);
+  } catch (err) {
+    console.error("Resend (acompte) exception:", err);
+  }
+}

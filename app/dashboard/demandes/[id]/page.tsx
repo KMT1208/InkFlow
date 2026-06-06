@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Mail, Paperclip, Phone } from "lucide-react";
 import { getDemoBooking } from "@/lib/demo";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { BookingActions } from "@/components/dashboard/booking-actions";
 
@@ -101,7 +102,7 @@ export default async function DemandeDetail({ params }: Props) {
             </div>
           </section>
 
-          <BookingActions />
+          <BookingActions bookingId={b.id} demo={!isSupabaseConfigured()} />
         </div>
       </div>
     </div>
