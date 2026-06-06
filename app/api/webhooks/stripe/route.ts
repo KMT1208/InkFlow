@@ -95,6 +95,12 @@ export async function POST(request: NextRequest) {
         }
         // TODO Phase 4 : SMS de confirmation (Twilio).
       }
+    } else if (
+      event.type === "customer.subscription.created" ||
+      event.type === "customer.subscription.updated" ||
+      event.type === "customer.subscription.deleted"
+    ) {
+      await handleSubscriptionChange(admin, event.data.object as Stripe.Subscription);
     }
   } catch (err) {
     // On loggue et on renvoie 500 pour que Stripe réessaie (l'évènement reste
@@ -104,4 +110,48 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ received: true });
+}
+
+// Met à jour l'abonnement SaaS du tatoueur depuis un évènement subscription.
+async function handleSubscriptionChange(
+  admin: ReturnType<typeof createAdminClient>,
+  sub: Stripe.Subscription,
+): Promise<void> {
+  const customerId =
+    typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+
+  const { data: artist } = await admin
+    .from("artists")
+    .select("id")
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle();
+  if (!artist) return;
+
+  const plan = sub.metadata?.plan ?? null;
+  const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
+  const periodEndUnix = (sub as { current_period_end?: number }).current_period_end;
+  const periodEnd = periodEndUnix ? new Date(periodEndUnix * 1000).toISOString() : null;
+  const priceId = sub.items.data[0]?.price.id ?? null;
+
+  await admin
+    .from("artists")
+    .update({
+      subscription_status: sub.status,
+      subscription_plan: plan,
+      trial_ends_at: trialEnd,
+    })
+    .eq("id", artist.id);
+
+  await admin.from("subscriptions").upsert(
+    {
+      artist_id: artist.id,
+      stripe_subscription_id: sub.id,
+      stripe_price_id: priceId,
+      plan,
+      status: sub.status,
+      current_period_end: periodEnd,
+      trial_end: trialEnd,
+    },
+    { onConflict: "artist_id" },
+  );
 }
