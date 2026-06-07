@@ -78,3 +78,17 @@ export const bookingRequestSchema = z.object({
   clientPhone: z.string().trim().max(40).optional(),
   consent: z.literal(true, { error: "Le consentement est obligatoire." }),
 });
+
+// Mise à jour du profil du tatoueur (Réglages).
+export const artistProfileSchema = z.object({
+  displayName: z.string().trim().min(2, { error: "Indiquez votre nom ou blaze." }),
+  slug: slugSchema,
+  bio: z.string().max(600).optional(),
+  city: z.string().trim().max(80).optional(),
+  instagram: z.string().trim().max(80).optional(),
+  website: z.string().trim().max(200).optional(),
+  theme: z.string().max(40),
+  depositType: z.enum(["fixed", "percent"]),
+  depositValue: z.coerce.number().min(0, { error: "Valeur invalide." }),
+  depositRefundable: z.boolean(),
+});

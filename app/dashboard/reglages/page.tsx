@@ -3,6 +3,7 @@ import { isStripeConfigured } from "@/lib/stripe";
 import { SettingsForm } from "@/components/dashboard/settings-form";
 import { StripeConnectButton } from "@/components/dashboard/stripe-connect-button";
 import { SubscribePanel } from "@/components/dashboard/subscribe-panel";
+import { getDashboardArtist } from "@/lib/dashboard";
 
 export default async function ReglagesPage({
   searchParams,
@@ -11,6 +12,7 @@ export default async function ReglagesPage({
 }) {
   const { stripe, abo } = await searchParams;
   const liveStripe = isSupabaseConfigured() && isStripeConfigured();
+  const { artist, demo } = await getDashboardArtist();
 
   return (
     <div className="space-y-6">
@@ -57,7 +59,7 @@ export default async function ReglagesPage({
         </section>
       )}
 
-      <SettingsForm />
+      <SettingsForm artist={artist} demo={demo} />
     </div>
   );
 }
