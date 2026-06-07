@@ -67,7 +67,10 @@ export async function signUp(
     },
   });
   if (error) {
-    return { error: traduireErreur(error.message) };
+    // Diagnostic temporaire : on expose le message brut de Supabase.
+    return {
+      error: `${traduireErreur(error.message)} — détail : ${error.message}`,
+    };
   }
 
   // Si la confirmation par email est désactivée dans Supabase, la session est
