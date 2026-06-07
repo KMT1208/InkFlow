@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { getSupabaseUrl } from "@/lib/supabase/config";
 
 // Client Supabase SERVICE-ROLE (clé secrète « sb_secret_… »).
 // ⚠️ Ce client BYPASSE la RLS : à n'utiliser QUE côté serveur, dans des chemins
@@ -8,16 +9,15 @@ import { createClient } from "@supabase/supabase-js";
 // Ne JAMAIS l'importer depuis un composant client : « server-only » fait échouer
 // le build si une frontière client tente de le charger.
 export function createAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const secretKey = process.env.SUPABASE_SECRET_KEY;
 
-  if (!url || !secretKey) {
+  if (!secretKey) {
     throw new Error(
-      "Client service-role indisponible : NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SECRET_KEY manquant.",
+      "Client service-role indisponible : SUPABASE_SECRET_KEY manquant.",
     );
   }
 
-  return createClient(url, secretKey, {
+  return createClient(getSupabaseUrl(), secretKey, {
     // Pas de session côté serveur : on agit avec la clé secrète, sans utilisateur.
     auth: { persistSession: false, autoRefreshToken: false },
   });
