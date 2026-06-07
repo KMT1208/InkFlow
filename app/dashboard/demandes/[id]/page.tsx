@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Mail, Paperclip, Phone } from "lucide-react";
-import { getDemoBooking } from "@/lib/demo";
-import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { getDashboardBooking } from "@/lib/bookings-data";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { BookingActions } from "@/components/dashboard/booking-actions";
 
@@ -19,8 +18,10 @@ const refGradients = [
 
 export default async function DemandeDetail({ params }: Props) {
   const { id } = await params;
-  const b = getDemoBooking(id);
-  if (!b) notFound();
+  const data = await getDashboardBooking(id);
+  if (!data) notFound();
+
+  const { booking: b, demo } = data;
 
   return (
     <div className="space-y-6">
@@ -32,13 +33,12 @@ export default async function DemandeDetail({ params }: Props) {
       </Link>
 
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="font-serif text-3xl font-semibold">{b.client_name}</h1>
+        <h1 className="font-serif text-3xl font-semibold">{b.clientName}</h1>
         <StatusBadge status={b.status} />
-        <span className="text-sm text-bone-dim">· reçue {b.created}</span>
+        <span className="text-sm text-bone-dim">· reçue {b.createdLabel}</span>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-        {/* Projet + références */}
         <div className="space-y-6">
           <section className="rounded-2xl border border-line bg-surface/40 p-6">
             <h2 className="font-serif text-lg text-bone">Le projet</h2>
@@ -46,10 +46,12 @@ export default async function DemandeDetail({ params }: Props) {
               <Field label="Type">
                 {b.projectType === "flash" ? "Flash" : "Personnalisé"}
               </Field>
-              <Field label="Zone du corps">{b.body_zone}</Field>
-              <Field label="Taille">{b.size}</Field>
-              <Field label="Budget">{b.budget}</Field>
-              <Field label="Disponibilité souhaitée">{b.preferredDate}</Field>
+              {b.bodyZone && <Field label="Zone du corps">{b.bodyZone}</Field>}
+              {b.size && <Field label="Taille">{b.size}</Field>}
+              {b.budget && <Field label="Budget">{b.budget}</Field>}
+              {b.preferredDate && (
+                <Field label="Disponibilité souhaitée">{b.preferredDate}</Field>
+              )}
             </dl>
             {b.description && (
               <div className="mt-5">
@@ -82,27 +84,28 @@ export default async function DemandeDetail({ params }: Props) {
           </section>
         </div>
 
-        {/* Contact + actions */}
         <div className="space-y-6">
           <section className="rounded-2xl border border-line bg-surface/40 p-6">
             <h2 className="font-serif text-lg text-bone">Contact</h2>
             <div className="mt-4 space-y-2 text-sm">
               <a
-                href={`mailto:${b.client_email}`}
+                href={`mailto:${b.clientEmail}`}
                 className="flex items-center gap-2 text-bone-dim transition-colors hover:text-bone"
               >
-                <Mail className="h-4 w-4 shrink-0 text-ink" /> {b.client_email}
+                <Mail className="h-4 w-4 shrink-0 text-ink" /> {b.clientEmail}
               </a>
-              <a
-                href={`tel:${b.client_phone.replace(/\s/g, "")}`}
-                className="flex items-center gap-2 text-bone-dim transition-colors hover:text-bone"
-              >
-                <Phone className="h-4 w-4 shrink-0 text-ink" /> {b.client_phone}
-              </a>
+              {b.clientPhone && (
+                <a
+                  href={`tel:${b.clientPhone.replace(/\s/g, "")}`}
+                  className="flex items-center gap-2 text-bone-dim transition-colors hover:text-bone"
+                >
+                  <Phone className="h-4 w-4 shrink-0 text-ink" /> {b.clientPhone}
+                </a>
+              )}
             </div>
           </section>
 
-          <BookingActions bookingId={b.id} demo={!isSupabaseConfigured()} />
+          <BookingActions bookingId={b.id} demo={demo} />
         </div>
       </div>
     </div>

@@ -74,8 +74,12 @@ export const DEMO_DASHBOARD_ARTIST: Artist = {
 export type DemoBookingStatus =
   | "nouvelle"
   | "devis_envoye"
+  | "acompte_attendu"
   | "acompte_paye"
-  | "confirmee";
+  | "confirmee"
+  | "terminee"
+  | "annulee"
+  | "refusee";
 
 export type DemoBooking = {
   id: string;
