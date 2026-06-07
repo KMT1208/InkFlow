@@ -8,7 +8,7 @@
 //
 // Précédence : on prend la variable d'env si elle est valide, sinon le repli.
 
-const FALLBACK_URL = "https://huzhhmullkdiunejvbu.supabase.co";
+const FALLBACK_URL = "https://huzhhmuillkdiunejvbu.supabase.co";
 const FALLBACK_PUBLISHABLE = "sb_publishable_Gixro7iP1UHs13bwH5j5Pw_Lc-u7DTf";
 
 function isHttpsUrl(value: string | undefined): boolean {
