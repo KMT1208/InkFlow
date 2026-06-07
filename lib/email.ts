@@ -108,3 +108,34 @@ export async function sendDepositRequest(params: {
     console.error("Resend (acompte) exception:", err);
   }
 }
+
+// Rappel de rendez-vous par email (canal "email" des reminders).
+export async function sendReminderEmail(params: {
+  to: string;
+  studioName: string;
+  whenLabel: string;
+  lead: string;
+}): Promise<void> {
+  if (!isResendConfigured()) return;
+
+  const studio = esc(params.studioName);
+  const when = esc(params.whenLabel);
+  const lead = esc(params.lead);
+
+  const body = `
+    <h1 style="margin:0 0 12px;font-size:22px;color:#0b0b0c;">Rappel de rendez-vous</h1>
+    <p style="margin:0 0 12px;color:#444;line-height:1.6;font-size:15px;">Votre rendez-vous chez <strong>${studio}</strong> a lieu <strong>${lead}</strong> (${when}).</p>
+    <p style="margin:0;color:#444;line-height:1.6;font-size:15px;">À très vite&nbsp;!</p>`;
+
+  try {
+    const { error } = await client().emails.send({
+      from: FROM,
+      to: params.to,
+      subject: `Rappel : votre rendez-vous chez ${params.studioName}`,
+      html: layout(body),
+    });
+    if (error) console.error("Resend (rappel) error:", error);
+  } catch (err) {
+    console.error("Resend (rappel) exception:", err);
+  }
+}
