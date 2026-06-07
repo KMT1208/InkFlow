@@ -4,10 +4,15 @@ import { cookies } from "next/headers";
 // Vrai uniquement si les clés Supabase sont présentes dans l'environnement.
 // Permet à l'app de rester consultable avant que le fondateur ne configure ses clés.
 export function isSupabaseConfigured() {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return false;
+  // Garde-fou : une URL invalide (ex. clé collée par erreur dans la variable URL)
+  // ne doit pas faire planter l'app — on la traite comme « non configuré ».
+  try {
+    return new URL(url).protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 // Client Supabase côté SERVEUR (Server Components, Server Actions, Route Handlers).
