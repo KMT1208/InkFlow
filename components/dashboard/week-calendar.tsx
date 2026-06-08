@@ -3,56 +3,75 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { CalendarAppt } from "@/lib/dashboard-data";
 
 const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 const START_HOUR = 9;
 const END_HOUR = 20;
 const ROW = 56; // px par heure
+const DAY_MS = 86_400_000;
 const HOURS = Array.from(
   { length: END_HOUR - START_HOUR },
   (_, i) => START_HOUR + i,
 );
 
-type Ev = {
-  day: number; // 0 = lundi
-  start: number;
-  end: number;
-  kind: "rdv" | "block";
-  title: string;
-  sub?: string;
-};
-
-// Événements de démonstration (récurrents sur la semaine affichée).
-const EVENTS: Ev[] = [
-  { day: 1, start: 11, end: 12.5, kind: "rdv", title: "Manon V.", sub: "Lettrage" },
-  { day: 3, start: 15, end: 18, kind: "rdv", title: "Hugo P.", sub: "Custom — dos" },
-  { day: 4, start: 13, end: 14, kind: "block", title: "Pause déj." },
-  { day: 5, start: 14, end: 17, kind: "rdv", title: "Aïssa M.", sub: "Serpent & pivoine" },
-  { day: 6, start: START_HOUR, end: END_HOUR, kind: "block", title: "Fermé" },
-];
-
-function mondayOf(d: Date) {
-  const x = new Date(d);
-  const dow = (x.getDay() + 6) % 7;
-  x.setDate(x.getDate() - dow);
-  x.setHours(0, 0, 0, 0);
+// Tout est raisonné en UTC : les rendez-vous sont stockés/affichés en UTC pour
+// rester cohérents (saisie = affichage). TODO post-MVP : vrai fuseau Europe/Paris.
+function mondayOfUTC(d: Date): Date {
+  const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const dow = (x.getUTCDay() + 6) % 7;
+  x.setUTCDate(x.getUTCDate() - dow);
   return x;
 }
-
-function addDays(d: Date, n: number) {
+function addDaysUTC(d: Date, n: number): Date {
   const x = new Date(d);
-  x.setDate(x.getDate() + n);
+  x.setUTCDate(x.getUTCDate() + n);
   return x;
 }
+function ymd(d: Date): string {
+  return `${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`;
+}
 
-const fmtDay = new Intl.DateTimeFormat("fr-FR", { day: "numeric" });
-const fmtRange = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
+const fmtDay = new Intl.DateTimeFormat("fr-FR", { day: "numeric", timeZone: "UTC" });
+const fmtRange = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+});
+const fmtTime = new Intl.DateTimeFormat("fr-FR", {
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "UTC",
+});
 
-export function WeekCalendar() {
+export function WeekCalendar({ appointments }: { appointments: CalendarAppt[] }) {
   const [offset, setOffset] = useState(0);
-  const weekStart = addDays(mondayOf(new Date()), offset * 7);
-  const weekEnd = addDays(weekStart, 6);
-  const todayKey = new Date().toDateString();
+  const weekStart = addDaysUTC(mondayOfUTC(new Date()), offset * 7);
+  const weekEnd = addDaysUTC(weekStart, 6);
+  const todayKey = ymd(new Date());
+
+  // Place chaque rendez-vous dans la semaine affichée (index de jour + heures).
+  const placed = appointments
+    .map((a) => {
+      const s = new Date(a.startsAt);
+      const e = new Date(a.endsAt);
+      const dayStart = Date.UTC(
+        s.getUTCFullYear(),
+        s.getUTCMonth(),
+        s.getUTCDate(),
+      );
+      const dayIdx = Math.round((dayStart - weekStart.getTime()) / DAY_MS);
+      const startH = s.getUTCHours() + s.getUTCMinutes() / 60;
+      const endH = e.getUTCHours() + e.getUTCMinutes() / 60;
+      return { ...a, dayIdx, startH, endH, s, e };
+    })
+    .filter(
+      (p) =>
+        p.dayIdx >= 0 &&
+        p.dayIdx < 7 &&
+        p.endH > START_HOUR &&
+        p.startH < END_HOUR,
+    );
 
   return (
     <div className="rounded-2xl border border-line bg-surface/40">
@@ -83,14 +102,9 @@ export function WeekCalendar() {
         <p className="font-serif text-lg text-bone">
           {fmtRange.format(weekStart)} – {fmtRange.format(weekEnd)}
         </p>
-        <div className="hidden items-center gap-4 text-xs text-bone-dim sm:flex">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-ink/40" /> RDV
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-surface-2" /> Bloqué
-          </span>
-        </div>
+        <span className="hidden items-center gap-1.5 text-xs text-bone-dim sm:flex">
+          <span className="h-2.5 w-2.5 rounded-sm bg-ink/40" /> Rendez-vous
+        </span>
       </div>
 
       {/* Grille */}
@@ -100,8 +114,8 @@ export function WeekCalendar() {
           <div className="grid grid-cols-[3.5rem_repeat(7,1fr)] border-b border-line">
             <div />
             {DAYS.map((d, i) => {
-              const date = addDays(weekStart, i);
-              const isToday = date.toDateString() === todayKey;
+              const date = addDaysUTC(weekStart, i);
+              const isToday = ymd(date) === todayKey;
               return (
                 <div key={d} className="border-l border-line px-2 py-2 text-center">
                   <p className="text-xs text-bone-dim">{d}</p>
@@ -141,24 +155,25 @@ export function WeekCalendar() {
                 {HOURS.map((h) => (
                   <div key={h} style={{ height: ROW }} className="border-t border-line/40" />
                 ))}
-                {EVENTS.filter((e) => e.day === dayIdx).map((e, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      top: (e.start - START_HOUR) * ROW + 2,
-                      height: (e.end - e.start) * ROW - 4,
-                    }}
-                    className={cn(
-                      "absolute left-1 right-1 overflow-hidden rounded-lg border p-2 text-xs leading-tight",
-                      e.kind === "rdv"
-                        ? "border-ink/40 bg-ink/15 text-bone"
-                        : "border-line bg-surface-2 text-bone-dim [background-image:repeating-linear-gradient(45deg,transparent,transparent_6px,rgba(255,255,255,0.03)_6px,rgba(255,255,255,0.03)_12px)]",
-                    )}
-                  >
-                    <p className="font-medium">{e.title}</p>
-                    {e.sub && <p className="truncate text-bone-dim">{e.sub}</p>}
-                  </div>
-                ))}
+                {placed
+                  .filter((e) => e.dayIdx === dayIdx)
+                  .map((e) => {
+                    const top = (Math.max(e.startH, START_HOUR) - START_HOUR) * ROW;
+                    const bottom = (Math.min(e.endH, END_HOUR) - START_HOUR) * ROW;
+                    return (
+                      <div
+                        key={e.id}
+                        style={{ top: top + 2, height: Math.max(bottom - top - 4, 18) }}
+                        className="absolute left-1 right-1 overflow-hidden rounded-lg border border-ink/40 bg-ink/15 p-2 text-xs leading-tight text-bone"
+                      >
+                        <p className="font-medium">{e.title}</p>
+                        <p className="truncate text-bone-dim">
+                          {fmtTime.format(e.s)}
+                          {e.sub ? ` · ${e.sub}` : ""}
+                        </p>
+                      </div>
+                    );
+                  })}
               </div>
             ))}
           </div>

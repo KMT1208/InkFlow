@@ -21,7 +21,7 @@ export default async function DemandeDetail({ params }: Props) {
   const data = await getDashboardBooking(id);
   if (!data) notFound();
 
-  const { booking: b, demo } = data;
+  const { booking: b } = data;
 
   return (
     <div className="space-y-6">
@@ -105,7 +105,7 @@ export default async function DemandeDetail({ params }: Props) {
             </div>
           </section>
 
-          <BookingActions bookingId={b.id} demo={demo} />
+          <BookingActions bookingId={b.id} status={b.status} />
         </div>
       </div>
     </div>

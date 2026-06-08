@@ -109,6 +109,38 @@ export async function sendDepositRequest(params: {
   }
 }
 
+// Devis envoyé au client (le tatoueur fixe un montant pour le projet).
+export async function sendQuoteEmail(params: {
+  to: string;
+  studioName: string;
+  clientName?: string | null;
+  amountLabel: string;
+}): Promise<void> {
+  if (!isResendConfigured()) return;
+
+  const studio = esc(params.studioName);
+  const amount = esc(params.amountLabel);
+  const hello = params.clientName ? `Bonjour ${esc(params.clientName)},` : "Bonjour,";
+
+  const body = `
+    <h1 style="margin:0 0 12px;font-size:22px;color:#0b0b0c;">Votre devis</h1>
+    <p style="margin:0 0 12px;color:#444;line-height:1.6;font-size:15px;">${hello}</p>
+    <p style="margin:0 0 12px;color:#444;line-height:1.6;font-size:15px;">Pour votre projet chez <strong>${studio}</strong>, le tarif proposé est de <strong>${amount}</strong>.</p>
+    <p style="margin:0;color:#444;line-height:1.6;font-size:15px;">Si cela vous convient, le studio vous enverra un lien pour régler l'acompte et bloquer votre créneau.</p>`;
+
+  try {
+    const { error } = await client().emails.send({
+      from: FROM,
+      to: params.to,
+      subject: `Votre devis chez ${params.studioName}`,
+      html: layout(body),
+    });
+    if (error) console.error("Resend (devis) error:", error);
+  } catch (err) {
+    console.error("Resend (devis) exception:", err);
+  }
+}
+
 // Rappel de rendez-vous par email (canal "email" des reminders).
 export async function sendReminderEmail(params: {
   to: string;
