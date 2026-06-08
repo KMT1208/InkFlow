@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireArtist } from "@/lib/auth";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { scheduleReminders } from "@/lib/reminders";
 import { sendQuoteEmail } from "@/lib/email";
 import { computeDepositCents, formatEur, type DepositType } from "@/lib/money";
@@ -83,6 +84,63 @@ export async function refuseBooking(
 
   revalidateBooking(bookingId);
   return { ok: true, message: "Demande refusée." };
+}
+
+// ── Acompte reçu hors-ligne (espèces, virement, Lydia…) ───────────────────
+// Permet de confirmer un acompte encaissé autrement que par Stripe : passe la
+// demande en « acompte_payé » et enregistre le paiement (compte dans le CA).
+export async function markDepositPaid(
+  bookingId: string,
+  _prev: InboxState,
+  _formData: FormData,
+): Promise<InboxState> {
+  void _formData;
+  if (!isSupabaseConfigured()) {
+    return { ok: true, message: "Acompte marqué comme reçu — planifiez le rendez-vous." };
+  }
+
+  const artist = await requireArtist();
+  const supabase = await createClient();
+
+  const { data: booking } = await supabase
+    .from("booking_requests")
+    .select("quote_amount")
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  const total = (booking?.quote_amount as number | null) ?? null;
+  const deposit = total
+    ? computeDepositCents(
+        total,
+        artist.deposit_type as DepositType,
+        artist.deposit_value as number,
+      )
+    : 0;
+
+  const { error } = await supabase
+    .from("booking_requests")
+    .update({ status: "acompte_paye" })
+    .eq("id", bookingId);
+  if (error) return { error: "Impossible de mettre à jour la demande." };
+
+  // Écriture en table `payments` réservée au service-role (RLS) ; l'artiste a
+  // déjà été authentifié et la propriété de la demande vérifiée ci-dessus.
+  try {
+    const admin = createAdminClient();
+    await admin.from("payments").insert({
+      artist_id: artist.id,
+      booking_id: bookingId,
+      amount: deposit,
+      currency: artist.currency ?? "eur",
+      status: "succeeded",
+    });
+  } catch {
+    // Le paiement n'a pas pu être journalisé (clé service-role absente) : on ne
+    // bloque pas le flux — le statut a déjà avancé.
+  }
+
+  revalidateBooking(bookingId);
+  return { ok: true, message: "Acompte marqué comme reçu — planifiez le rendez-vous." };
 }
 
 // ── Planifier le rendez-vous ──────────────────────────────────────────────

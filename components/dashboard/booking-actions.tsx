@@ -2,10 +2,11 @@
 
 import type { ReactNode } from "react";
 import { useActionState } from "react";
-import { CalendarPlus, Check, FileText, Loader2, X } from "lucide-react";
+import { CalendarPlus, Check, FileText, Loader2, Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { requestDeposit, type DepositRequestState } from "@/lib/actions/payments";
 import {
+  markDepositPaid,
   refuseBooking,
   scheduleAppointment,
   sendQuote,
@@ -58,7 +59,12 @@ export function BookingActions({
       <h2 className="font-serif text-lg text-bone">Actions</h2>
       <QuoteForm bookingId={bookingId} />
       <div className="space-y-2 border-t border-line pt-5">
+        <p className="text-xs uppercase tracking-wider text-bone-dim">
+          Accepter la demande
+        </p>
         <AcceptDepositButton bookingId={bookingId} />
+        <p className="text-center text-xs text-bone-dim">— ou —</p>
+        <MarkDepositButton bookingId={bookingId} />
         <RefuseButton bookingId={bookingId} />
       </div>
     </section>
@@ -131,7 +137,38 @@ function AcceptDepositButton({ bookingId }: { bookingId: string }) {
           </>
         ) : (
           <>
-            <Check className="mr-1.5 h-4 w-4" /> Accepter et demander l&apos;acompte
+            <Check className="mr-1.5 h-4 w-4" /> Demander l&apos;acompte par carte
+          </>
+        )}
+      </Button>
+      {state?.error && <p className="mt-2 text-sm text-ink">{state.error}</p>}
+    </form>
+  );
+}
+
+function MarkDepositButton({ bookingId }: { bookingId: string }) {
+  const [state, action, pending] = useActionState<InboxState, FormData>(
+    markDepositPaid.bind(null, bookingId),
+    undefined,
+  );
+  if (state?.ok) return <Note tone="success">{state.message}</Note>;
+
+  return (
+    <form action={action}>
+      <Button
+        type="submit"
+        variant="outline"
+        disabled={pending}
+        className="w-full"
+      >
+        {pending ? (
+          <>
+            <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> …
+          </>
+        ) : (
+          <>
+            <Wallet className="mr-1.5 h-4 w-4" /> Acompte déjà reçu (espèces,
+            virement…)
           </>
         )}
       </Button>
