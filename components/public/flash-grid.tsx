@@ -43,14 +43,24 @@ export function FlashGrid({
           <div
             className={`relative aspect-[4/5] bg-gradient-to-br ${gradients[i % gradients.length]}`}
           >
+            {f.image_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={f.image_url}
+                alt={f.title}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            )}
             {f.size && (
-              <span className="absolute left-3 top-3 rounded-full bg-noir/60 px-2 py-1 text-xs text-bone backdrop-blur">
+              <span className="absolute left-3 top-3 z-10 rounded-full bg-noir/60 px-2 py-1 text-xs text-bone backdrop-blur">
                 {f.size}
               </span>
             )}
-            <span className="absolute bottom-3 left-3 font-serif text-xl text-bone/90">
-              {f.title}
-            </span>
+            {!f.image_url && (
+              <span className="absolute bottom-3 left-3 font-serif text-xl text-bone/90">
+                {f.title}
+              </span>
+            )}
           </div>
           <div className="p-4">
             <div className="flex items-center justify-between gap-2">

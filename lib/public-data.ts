@@ -27,7 +27,7 @@ export async function getPublicArtist(slug: string): Promise<PublicArtistData | 
 
   const { data: flash } = await supabase
     .from("flash")
-    .select("id, title, description, size, placements, price")
+    .select("id, title, description, size, placements, price, image_url")
     .eq("artist_id", artist.id)
     .eq("is_available", true)
     .order("position", { ascending: true });
